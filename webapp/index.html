@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>年表記帳本</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <p class="eyebrow">Personal Finance Desk</p>
+          <h1>年表記帳本</h1>
+          <p class="brand-copy">年表是主控台，每日支出與月明細各自獨立，照你的習慣記就好。</p>
+        </div>
+
+        <nav class="nav">
+          <button class="nav-link" type="button" data-view="annual">年度檢視</button>
+          <button class="nav-link" type="button" data-view="daily">每日支出</button>
+          <button class="nav-link" type="button" data-view="monthly">月明細</button>
+        </nav>
+
+        <div class="sidebar-controls">
+          <label class="field">
+            <span>年份</span>
+            <select id="yearSelect"></select>
+          </label>
+          <button id="addYearButton" class="ghost-button" type="button">新增年份</button>
+          <button id="seedDemoButton" class="primary-button" type="button">載入示範資料</button>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <section class="view" data-view-panel="annual">
+          <section class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="panel-kicker">Annual Overview</p>
+                <h2>年度檢視</h2>
+              </div>
+              <p class="panel-note">收入、帳戶餘額與固定支出直接填在年表，計算欄位會自動更新。</p>
+            </div>
+            <div id="annualTableContainer" class="table-wrap"></div>
+          </section>
+        </section>
+
+        <section class="view" data-view-panel="daily">
+          <section class="panel split-panel">
+            <div class="panel-header">
+              <div>
+                <p class="panel-kicker">Daily Log</p>
+                <h2 id="dailyFormTitle">新增每日支出</h2>
+              </div>
+              <p class="panel-note">分類可以自己新增、重新命名；每筆支出也能直接編輯或刪除。</p>
+            </div>
+
+            <div class="daily-layout">
+              <div class="stack">
+                <form id="expenseForm" class="expense-form">
+                  <input id="editingExpenseId" type="hidden" />
+                  <label class="field">
+                    <span>日期</span>
+                    <input id="expenseDate" name="date" type="date" required />
+                  </label>
+                  <label class="field">
+                    <span>分類</span>
+                    <select id="expenseCategory" name="category"></select>
+                  </label>
+                  <label class="field">
+                    <span>金額</span>
+                    <input id="expenseAmount" name="amount" type="number" min="0" step="1" required />
+                  </label>
+                  <label class="field full-width">
+                    <span>備註</span>
+                    <input id="expenseNote" name="note" type="text" placeholder="可留空" />
+                  </label>
+                  <div class="button-row full-width">
+                    <button id="expenseSubmitButton" class="primary-button" type="submit">新增支出</button>
+                    <button id="cancelEditButton" class="ghost-inline hidden" type="button">取消編輯</button>
+                  </div>
+                </form>
+
+                <section class="subpanel">
+                  <div class="subheader">
+                    <div>
+                      <p class="panel-kicker">Category Manager</p>
+                      <h3>支出分類</h3>
+                    </div>
+                  </div>
+                  <form id="categoryForm" class="category-form">
+                    <input id="editingCategoryId" type="hidden" />
+                    <label class="field grow">
+                      <span>分類名稱</span>
+                      <input id="categoryName" type="text" placeholder="例如：孩子活動" required />
+                    </label>
+                    <button id="categorySubmitButton" class="primary-button" type="submit">新增分類</button>
+                    <button id="cancelCategoryEditButton" class="ghost-inline hidden" type="button">取消</button>
+                  </form>
+                  <div id="categoryList" class="category-list"></div>
+                </section>
+              </div>
+
+              <div class="detail-block">
+                <div class="subheader">
+                  <div>
+                    <h3>本月支出清單</h3>
+                    <p id="dailyMonthlySubtotal" class="small-note"></p>
+                  </div>
+                  <label class="field compact">
+                    <span>月份</span>
+                    <select id="dailyMonthSelect"></select>
+                  </label>
+                </div>
+                <div id="dailyExpenseList" class="expense-group-list"></div>
+              </div>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" data-view-panel="monthly">
+          <section class="panel">
+            <div class="panel-header monthly-header">
+              <div>
+                <p class="panel-kicker">Monthly Focus</p>
+                <h2 id="monthlyDetailTitle">月明細</h2>
+              </div>
+              <div class="month-slider-box">
+                <label class="field">
+                  <span>月份拉桿</span>
+                  <input id="monthRange" class="month-range" type="range" min="1" max="12" step="1" value="1" />
+                </label>
+                <div class="month-labels" id="monthLabels"></div>
+              </div>
+            </div>
+
+            <div id="monthlySummaryCards" class="summary-grid"></div>
+
+            <div class="chart-grid">
+              <section class="subpanel">
+                <div class="subheader">
+                  <div>
+                    <p class="panel-kicker">Income</p>
+                    <h3>收入區</h3>
+                  </div>
+                </div>
+                <div class="chart-card">
+                  <div id="incomePie" class="pie-chart"></div>
+                  <div id="incomeLegend" class="legend-list"></div>
+                </div>
+              </section>
+
+              <section class="subpanel">
+                <div class="subheader">
+                  <div>
+                    <p class="panel-kicker">Fixed Expense</p>
+                    <h3>固定支出區</h3>
+                  </div>
+                </div>
+                <div class="chart-card">
+                  <div id="fixedPie" class="pie-chart"></div>
+                  <div id="fixedLegend" class="legend-list"></div>
+                </div>
+              </section>
+
+              <section class="subpanel">
+                <div class="subheader">
+                  <div>
+                    <p class="panel-kicker">Variable Expense</p>
+                    <h3>支出分類區</h3>
+                  </div>
+                </div>
+                <div class="chart-card">
+                  <div id="variablePie" class="pie-chart"></div>
+                  <div id="variableLegend" class="legend-list"></div>
+                </div>
+              </section>
+            </div>
+
+            <div class="monthly-columns">
+              <div class="detail-block">
+                <h3>當月細項</h3>
+                <div id="monthlyManualSections" class="manual-sections"></div>
+              </div>
+
+              <div class="detail-block">
+                <h3>每日支出清單</h3>
+                <div id="monthlyExpenseList" class="expense-group-list"></div>
+              </div>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <template id="expenseItemTemplate">
+      <article class="expense-item">
+        <div class="expense-main">
+          <strong class="expense-item-title"></strong>
+          <p class="expense-item-note"></p>
+        </div>
+        <div class="expense-item-meta">
+          <span class="expense-item-date"></span>
+          <span class="expense-item-amount"></span>
+          <div class="expense-item-actions">
+            <button class="mini-button expense-edit" type="button">編輯</button>
+            <button class="mini-button danger expense-delete" type="button">刪除</button>
+          </div>
+        </div>
+      </article>
+    </template>
+  </body>
+  <script src="./app.js"></script>
+</html>
