@@ -2,3 +2,7 @@ __pycache__/
 *.py[cod]
 ~$*.xlsx
 ~$*.xlsm
+node_modules/
+bookkeeping-project/
+desktop-photo-widget/
+phonetic-ime-prototype/
